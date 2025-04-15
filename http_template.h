@@ -1,0 +1,1 @@
+extern char http_template[];

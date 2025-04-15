@@ -1,4 +1,5 @@
 #include "toolgets.h"
+#include "http_template.h"
 
 UINT16 myExposePort = 8080;
 ipv4_addr TheGuestSrcIP = { 0 }; UINT16 TheGuestSrcPort = 0;
@@ -41,17 +42,18 @@ void extern_worker()
         recvSize = recv(guestSocket, payload, PayloadSize, 0);
         if (recvSize == SOCKET_ERROR) {
             printf("recv failed: %d\n", WSAGetLastError());
-            closesocket(guestSocket); guestSocket = NULL;
-            continue;
+            goto fin;
         }
         printf("Recv from the guest:\n");
         dump_packet(payload, recvSize);
-        // simply reply with "Hi"
-        if (send(guestSocket, "Hi", 3, 0) == SOCKET_ERROR) {
+        // simply reply with http_template
+        if (send(guestSocket, http_template, strlen(http_template) + 1, 0) == SOCKET_ERROR) {
             printf("send failed: %d\n", WSAGetLastError());
-            continue;
+            goto fin;
         }
-        printf("Sent Hi to the guest\n");
+        printf("Sent template to the guest\n");
+        fin:
+        closesocket(guestSocket); guestSocket = NULL;
     }
 }
 
