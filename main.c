@@ -24,7 +24,6 @@ __inline void waitGuestOnline()
     int guestAddrSize = sizeof(guestAddr);
     getpeername(guestSocket, (struct sockaddr*)&guestAddr, &guestAddrSize);
     TheGuestSrcIP.addr = guestAddr.sin_addr.S_un.S_addr;
-    // get the guest port
     TheGuestSrcPort = guestAddr.sin_port;
     printf("The Guest is %d.%d.%d.%d:%d\n", TheGuestSrcIP.addr_bytes[0], TheGuestSrcIP.addr_bytes[1], TheGuestSrcIP.addr_bytes[2], TheGuestSrcIP.addr_bytes[3], ntohs(TheGuestSrcPort));
 }
@@ -35,23 +34,20 @@ void extern_worker()
     UINT32 recvSize = 0;
     while (1)
     {
-        if(guestSocket == NULL)
-        {
-            waitGuestOnline();
-        }
+        waitGuestOnline();
+        set_sock_timeout(guestSocket, 5000);
         recvSize = recv(guestSocket, payload, PayloadSize, 0);
         if (recvSize == SOCKET_ERROR) {
             printf("recv failed: %d\n", WSAGetLastError());
             goto fin;
         }
-        printf("Recv from the guest:\n");
-        dump_packet(payload, recvSize);
+        printf("Recv from the guest:\n"); dump_packet(payload, recvSize);
         // simply reply with http_template
         if (send(guestSocket, http_template, strlen(http_template) + 1, 0) == SOCKET_ERROR) {
             printf("send failed: %d\n", WSAGetLastError());
             goto fin;
         }
-        printf("Sent template to the guest\n");
+        printf("Sent template to the guest!\n");
         fin:
         closesocket(guestSocket); guestSocket = NULL;
     }

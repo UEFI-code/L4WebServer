@@ -39,6 +39,15 @@ SOCKET init_winsock(UINT16 bindPort) {
     return L4Socket;
 }
 
+void set_sock_timeout(SOCKET sock, uint32_t timeout) {
+    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(uint32_t)) == SOCKET_ERROR) {
+        printf("setsockopt failed: %d\n", WSAGetLastError());
+        closesocket(sock);
+        WSACleanup();
+        exit(1);
+    }
+}
+
 void dump_packet(UINT8* packet, UINT32 packetSize) {
     printf("------ Packet Dump ------\n");
     for (UINT32 i = 0; i < packetSize; i++) {
