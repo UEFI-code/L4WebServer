@@ -2,16 +2,15 @@
 #include "http_template.h"
 
 UINT16 myExposePort = 8080;
-ipv4_addr TheGuestSrcIP = { 0 }; UINT16 TheGuestSrcPort = 0;
 
-SOCKET externalSocket = NULL, guestSocket = NULL;
+SOCKET externalSocket = NULL;
 
 HANDLE workerThread = NULL;
 
-__inline void waitGuestOnline()
+__inline SOCKET waitGuestOnline()
 {
     printf("Waiting for the guest online...\n");
-    guestSocket = accept(externalSocket, NULL, NULL);
+    SOCKET guestSocket = accept(externalSocket, NULL, NULL);
     if (guestSocket == INVALID_SOCKET) {
         printf("accept failed: %d\n", WSAGetLastError());
         closesocket(externalSocket);
@@ -19,22 +18,19 @@ __inline void waitGuestOnline()
         exit(1);
     }
     printf("The Guest is online!\n");
-    // now, get the guest IP
-    struct sockaddr_in guestAddr = { 0 };
-    int guestAddrSize = sizeof(guestAddr);
-    getpeername(guestSocket, (struct sockaddr*)&guestAddr, &guestAddrSize);
-    TheGuestSrcIP.addr = guestAddr.sin_addr.S_un.S_addr;
-    TheGuestSrcPort = guestAddr.sin_port;
-    printf("The Guest is %d.%d.%d.%d:%d\n", TheGuestSrcIP.addr_bytes[0], TheGuestSrcIP.addr_bytes[1], TheGuestSrcIP.addr_bytes[2], TheGuestSrcIP.addr_bytes[3], ntohs(TheGuestSrcPort));
+	return guestSocket;
 }
 
 void extern_worker()
 {
-    UINT8 *payload = (UINT8*)malloc(PayloadSize);
-    UINT32 recvSize = 0;
+    UINT8 *payload = (UINT8*)malloc(PayloadSize); UINT32 recvSize = 0;
+    struct sockaddr_in guestAddr = { 0 }; int guestAddrSize = sizeof(guestAddr);
     while (1)
     {
-        waitGuestOnline();
+        SOCKET guestSocket = waitGuestOnline();
+        getpeername(guestSocket, (struct sockaddr*)&guestAddr, &guestAddrSize);
+        uint8_t* guestIP = (uint8_t*)&guestAddr.sin_addr.S_un.S_addr;
+		printf("The guest IP is %d.%d.%d.%d:%d\n", guestIP[0], guestIP[1], guestIP[2], guestIP[3], ntohs(guestAddr.sin_port));
         set_sock_timeout(guestSocket, 5000);
         recvSize = recv(guestSocket, payload, PayloadSize, 0);
         if (recvSize == SOCKET_ERROR) {
