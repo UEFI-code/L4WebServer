@@ -16,7 +16,8 @@ typedef struct
     UINT8 status; // 0x44 is broken pipe, 0x55 is normal
 } ctlHeader;
 
-#define PayloadSize 4096
+#define RX_PayloadSize 4096
+#define TX_PayloadSize 4096
 
 extern SOCKET init_winsock(UINT16 bindPort);
 

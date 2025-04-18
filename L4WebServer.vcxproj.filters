@@ -21,7 +21,7 @@
     <ClCompile Include="toolgets.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="http_template.c">
+    <ClCompile Include="http_processor.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -29,7 +29,7 @@
     <ClInclude Include="toolgets.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="http_template.h">
+    <ClInclude Include="http_processor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

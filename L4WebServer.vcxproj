@@ -127,12 +127,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="http_template.c" />
+    <ClCompile Include="http_processor.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="toolgets.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="http_template.h" />
+    <ClInclude Include="http_processor.h" />
     <ClInclude Include="toolgets.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

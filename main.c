@@ -1,5 +1,5 @@
 #include "toolgets.h"
-#include "http_template.h"
+#include "http_processor.h"
 
 UINT16 myExposePort = 8080;
 
@@ -23,7 +23,8 @@ __inline SOCKET waitGuestOnline()
 
 void extern_worker()
 {
-    UINT8 *payload = (UINT8*)malloc(PayloadSize); UINT32 recvSize = 0;
+    UINT8 *rx_payload = (UINT8*)malloc(RX_PayloadSize); UINT32 recvSize = 0;
+    UINT8 *tx_payload = (UINT8*)malloc(TX_PayloadSize); UINT32 sendSize = 0;
     struct sockaddr_in guestAddr = { 0 }; int guestAddrSize = sizeof(guestAddr);
     while (1)
     {
@@ -32,18 +33,18 @@ void extern_worker()
         uint8_t* guestIP = (uint8_t*)&guestAddr.sin_addr.S_un.S_addr;
 		printf("The guest IP is %d.%d.%d.%d:%d\n", guestIP[0], guestIP[1], guestIP[2], guestIP[3], ntohs(guestAddr.sin_port));
         set_sock_timeout(guestSocket, 5000);
-        recvSize = recv(guestSocket, payload, PayloadSize, 0);
+        recvSize = recv(guestSocket, rx_payload, RX_PayloadSize, 0);
         if (recvSize == SOCKET_ERROR) {
             printf("recv failed: %d\n", WSAGetLastError());
             goto fin;
         }
-        printf("Recv from the guest:\n"); dump_packet(payload, recvSize);
-        // simply reply with http_template
-        if (send(guestSocket, http_template, strlen(http_template) + 1, 0) == SOCKET_ERROR) {
+        printf("Recv from the guest:\n"); dump_packet(rx_payload, recvSize);
+        reply_http_req(&guestAddr, (char*)rx_payload, recvSize, (char*)tx_payload, &sendSize);
+        if (send(guestSocket, tx_payload, sendSize, 0) == SOCKET_ERROR) {
             printf("send failed: %d\n", WSAGetLastError());
             goto fin;
         }
-        printf("Sent template to the guest!\n");
+        printf("Sent payload to the guest!\n");
         fin:
         closesocket(guestSocket); guestSocket = NULL;
     }
