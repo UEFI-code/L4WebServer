@@ -1,1 +1,1 @@
-extern void reply_http_req(struct sockaddr_in *guestAddr, char *http_req, uint32_t req_len, char *http_res, uint32_t *res_len);
+extern void reply_http_req(SOCKET guestSocket, struct sockaddr_in *guestAddr, char *http_rx, uint32_t rx_len, char *http_tx);
